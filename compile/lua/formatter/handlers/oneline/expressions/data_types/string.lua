@@ -1,4 +1,4 @@
-local quote = request('^.^.^.^.quote_string')
+local quote = request('^.^.^.^.^.quote_string')
 
 return
   function(self, node)
