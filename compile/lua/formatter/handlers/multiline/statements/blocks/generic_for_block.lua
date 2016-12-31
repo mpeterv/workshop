@@ -1,13 +1,6 @@
 return
   function(self, node)
-    self.printer:emit('for ')
-    self:process_node(node.names)
-    self.printer:emit(' in ')
-    self:process_node(node.expr_list)
-    self.printer:emit(' do')
-    self.printer:emit_nl()
-    self.printer:inc_indent()
-    self:process_node(node.body)
-    self.printer:dec_indent()
-    self.printer:emit('end')
+    self:process_block_oneline('for', nil, node.names)
+    self:process_block_oneline('in', nil, node.expr_list)
+    self:process_block_multiline('do', 'end', node.body)
   end
