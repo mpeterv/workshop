@@ -11,6 +11,7 @@ return
       if is_function(handlers) then
         local handler = handlers
         handler(self, node)
+      --[[
       elseif is_table(handlers) then
         local init_state = self.printer:get_state()
         local init_text = self.printer:get_text()
@@ -55,6 +56,7 @@ return
         self.printer.text:add(init_text_base)
         self.printer:set_state(good_state)
         self.printer.text:add(good_text)
+      --]]
       else
         self.printer:emit('<' .. node_type .. '>')
       end

@@ -11,6 +11,7 @@ return
 
     emit = request('emit'),
     emit_nl = request('emit_nl'),
+    request_clean_line = request('request_clean_line'),
 
     inc_indent = request('inc_indent'),
     dec_indent = request('dec_indent'),

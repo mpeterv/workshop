@@ -5,4 +5,5 @@ return
       self.has_debt = false
     end
     self.text:add(s)
+    self.on_clean_line = false
   end
