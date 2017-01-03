@@ -1,8 +1,12 @@
---[[
-  Variative mode is when we first try oneline and if we
-  get too long representation then switch to multiline.
-]]
 return
   function(self, prefix, postfix, node)
-    -- Smart variative stuff will be here.
+    self:variate(
+      { -- performance sink: probably may const of it
+        self.process_block_oneline,
+        self.process_block_multiline,
+      },
+      prefix,
+      postfix,
+      node
+    )
   end

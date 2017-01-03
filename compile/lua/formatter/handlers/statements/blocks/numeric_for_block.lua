@@ -1,4 +1,4 @@
-return
+local multiliner =
   function(self, node)
     self.printer:emit('for ')
     self:process_node(node.index)
@@ -12,4 +12,13 @@ return
     end
     self.printer:emit(' ')
     self:process_block_multiline('do', 'end', node.body)
+  end
+
+local variants =
+  {
+    {handle = multiliner, is_multiline = true},
+  }
+return
+  function(self, node)
+    self:variate(variants, node)
   end
