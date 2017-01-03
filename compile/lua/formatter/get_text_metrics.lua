@@ -1,7 +1,7 @@
 -- Probably this function should be moved somewhere out of virtual printer.
 
-local line_iterator = request('^.^.^.^.handy_mechs.line_iterators.string')
-local trim_linefeed = request('^.^.^.^.string.trim_linefeed')
+local line_iterator = request('^.^.^.handy_mechs.line_iterators.string')
+local trim_linefeed = request('^.^.^.string.trim_linefeed')
 
 return
   function(s)
