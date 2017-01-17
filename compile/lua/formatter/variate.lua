@@ -13,14 +13,25 @@ return
       self.printer.text:init()
       self.printer.text:add(init_last_line)
 
-      local handler = representers[i]
+      local handler, handler_is_multiline
+      do
+        local handler_rec = representers[i]
+        if is_table(handler_rec) then
+          handler = handler_rec[1]
+          handler_is_multiline = handler_rec.is_multiline
+        elseif is_function(handler_rec) then
+          handler = handler_rec
+        end
+        assert(handler)
+      end
+
       if
         not good_state or
-        not handler.is_multiline or
-        (handler.is_multiline and self.printer.variate_state.is_multiline_allowed)
+        not handler_is_multiline or
+        (handler_is_multiline and self.printer.variate_state.is_multiline_allowed)
       then
-        self.printer.variate_state.is_multiline_allowed = handler.is_multiline
-        handler.handle(self, ...)
+        self.printer.variate_state.is_multiline_allowed = handler_is_multiline
+        handler(self, ...)
         self.printer.variate_state.is_multiline_allowed = init_state.variate_state.is_multiline_allowed
 
         local text = self.printer:get_text()
