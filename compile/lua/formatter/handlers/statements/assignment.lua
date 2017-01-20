@@ -1,7 +1,7 @@
 local oneliner =
   function(self, node)
     self:process_node(node.dest_list)
-    self.printer:emit(' = ')
+    self.printer:add_text(' = ')
     self:process_node(node.val_list)
   end
 
@@ -9,8 +9,8 @@ local multiliner =
   function(self, node)
     self:process_node(node.dest_list)
     local printer = self.printer
-    printer:emit(' =')
-    printer:emit_nl()
+    printer:add_text(' =')
+    printer:close_line()
     printer:inc_indent()
     self:process_node(node.val_list)
     printer:dec_indent()

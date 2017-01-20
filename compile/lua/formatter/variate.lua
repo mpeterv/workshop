@@ -9,6 +9,27 @@
   Another problem is that we should return result even it is not
   valid in terms of <multiline_allowed> and representation_is_allowed().
   This is for case when we have no other choice.
+  --
+  Current architecture easily becomes a performance black hole.
+  Consider we are formatting a statement "a = {z = {}}". It parsed
+  to something like
+
+    <assignment>("a", <table>( ("z", <table>() ) ) )
+
+  Both <assignment> and <table> have one-line and multiline versions.
+  So we iterate from multiline to oneline as
+
+    <assignment-m> <table-m> <table-m>
+                             <table-1>
+                   <table-1> <table-1>
+    <assignment-1> <table-1> <table-1>
+
+  The problem is that internal nodes called many times for same
+  values, differed only by parent function who called it and usually
+  by indentation in "printer" device abstraction.
+
+  Also for a table with many values we anyway call one-line version
+  which will fail in representation_is_allowed() function.
 ]]
 
 local states = {}
@@ -41,8 +62,6 @@ local is_multiline_allowed =
       return get()
     end
   end
-
-local split_last_line = request('^.^.^.string.split_last_line')
 
 local get_handler =
   function(handler_rec)
@@ -106,70 +125,78 @@ local get_most_suitable_handler =
     return result, is_multiline
   end
 
+local printer_class = request('printer.interface')
+
+local represent =
+  function(self, handler, handler_is_multiline, node)
+    local original_presentation = self.printer
+
+    local trial_presentation = new(printer_class)
+    trial_presentation:init()
+    local num_lines = #original_presentation.text.lines
+    trial_presentation.text.lines[1] = original_presentation.text.lines[num_lines]
+    trial_presentation.line_indents[1] = original_presentation.line_indents[num_lines]
+    trial_presentation.next_line_indent = original_presentation.next_line_indent
+
+    self.printer = trial_presentation
+    add(handler_is_multiline)
+
+    handler(self, node)
+
+    remove()
+    local has_failed
+    if is_nil(trial_presentation.has_failed_to_represent) then
+      has_failed = false
+    else
+      has_failed = trial_presentation.has_failed_to_represent
+    end
+    if not handler_is_multiline and (#trial_presentation.text.lines > 1) then
+      has_failed = true
+    end
+
+    -- print(('[%s](%s)'):format(self.printer:get_text(), has_failed))
+    self.printer = original_presentation
+
+    return trial_presentation, has_failed
+  end
+
 return
-  function(self, representers, ...)
-    local init_state = self.printer:get_state()
-    local init_text = self.printer:get_text()
-    local init_text_base, init_last_line = split_last_line(init_text)
+  function(self, representers, node)
+    self.printer.has_failed_to_represent = false
 
-    local represent =
-      function(self, handler, handler_is_multiline, ...)
-        self.printer:set_state(init_state)
-        self.printer.text:init()
-        self.printer.text:add(init_last_line)
-        add(handler_is_multiline)
+    local representation
 
-        self.printer.has_failed_to_represent = nil
-        handler(self, ...)
-        local has_failed
-        if is_nil(self.printer.has_failed_to_represent) then
-          has_failed = false
-        else
-          has_failed = self.printer.has_failed_to_represent
-        end
-        self.printer.has_failed_to_represent = nil
-
-        remove()
-        local state = self.printer:get_state()
-        local text = self.printer:get_text()
-
-        return state, text, has_failed
-      end
-
-    local good_state, good_text
-    local failsafe_state, failsafe_text
-    -- [[
     for i = 1, #representers do
       local handler, handler_is_multiline = get_handler(representers[i])
       if
         is_multiline_allowed() or
         (not is_multiline_allowed() and not handler_is_multiline)
       then
-        local state, text, has_failed = represent(self, handler, handler_is_multiline, ...)
-        if not has_failed and self:representation_is_allowed(text) then
-          good_state, good_text = state, text
-        elseif not failsafe_state then
-          failsafe_state, failsafe_text = state, text
+        local trial_presentation, has_failed =
+          represent(self, handler, handler_is_multiline, node)
+        if
+          not has_failed and
+          self:representation_is_allowed(trial_presentation)
+        then
+          representation = trial_presentation
+        else
+          if not representation then
+            self.printer.has_failed_to_represent = true
+            representation = trial_presentation
+          end
+          break
         end
       end
     end
-    --]]
 
-    self.printer.text:init()
-    self.printer.text:add(init_text_base)
-    if good_state then
-      self.printer:set_state(good_state)
-      self.printer.text:add(good_text)
-      self.printer.has_failed_to_represent = false
-    else
-      if not failsafe_state then
-        local handler, handler_is_multiline =
-          get_most_suitable_handler(representers, is_multiline_allowed())
-        failsafe_state, failsafe_text =
-          represent(self, handler, handler_is_multiline, ...)
-      end
-      self.printer:set_state(failsafe_state)
-      self.printer.text:add(failsafe_text)
+    if not representation then
+      local handler, handler_is_multiline =
+        get_most_suitable_handler(representers, is_multiline_allowed())
+      representation =
+        represent(self, handler, handler_is_multiline, node)
       self.printer.has_failed_to_represent = true
     end
+
+    self.printer.text.lines[#self.printer.text.lines] = ''
+    self.printer:concat_printer(representation, true)
   end
