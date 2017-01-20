@@ -154,7 +154,7 @@ local represent =
       has_failed = true
     end
 
-    -- print(('[%s](%s)'):format(self.printer:get_text(), has_failed))
+    -- print(('[%s]'):format(self.printer:get_text()))
     self.printer = original_presentation
 
     return trial_presentation, has_failed
