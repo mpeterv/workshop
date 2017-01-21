@@ -1,7 +1,7 @@
 return
   {
     handlers = request('handlers.interface'),
-    printer = request('^.^.^.string.text_block.interface'),
+    printer = new(request('^.^.^.string.text_block.interface')),
 
     init = request('init'),
     process_list = request('process_list'),
