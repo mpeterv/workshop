@@ -1,4 +1,4 @@
-return
+local oneliner =
   function(self, node)
     local printer = self.printer
     local term
@@ -25,8 +25,7 @@ return
     end
   end
 
---[[ mul-line
-return
+local multiliner =
   function(self, node)
     local printer = self.printer
     local term
@@ -53,4 +52,6 @@ return
       end
     end
   end
-]]
+
+return
+  oneliner

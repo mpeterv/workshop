@@ -1,4 +1,4 @@
-local multiliner =
+return
   function(self, node)
     self.printer:add_text('for ')
     self:process_node(node.index)
@@ -12,9 +12,4 @@ local multiliner =
     end
     self.printer:add_text(' ')
     self:process_block_multiline('do', 'end', node.body)
-  end
-
-return
-  function(self, node)
-    multiliner(self, node)
   end

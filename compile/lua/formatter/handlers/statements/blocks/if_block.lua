@@ -1,4 +1,4 @@
-local multiliner =
+return
   function(self, node)
     self:process_block_oneline('if', 'then', node.if_part.condition)
     self:process_block_multiline(nil, nil, node.if_part.body)
@@ -16,9 +16,4 @@ local multiliner =
     end
 
     self.printer:add_text('end')
-  end
-
-return
-  function(self, node)
-    multiliner(self, node)
   end
