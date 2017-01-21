@@ -22,8 +22,30 @@ return
   {
     init = request('init'),
 
-    lines = {}, -- read-only
+    lines = {},
+    line_indents = {},
 
-    add_line = request('add_line'),
+    close_line = request('close_line'),
     add_text = request('add_text'),
+    add_to_prev_text = request('add_to_prev_text'),
+
+    on_clean_line = request('on_clean_line'),
+    request_clean_line = request('request_clean_line'),
+    request_empty_line = request('request_empty_line'),
+
+    next_line_indent = 0,
+    line_indents = {},
+    indent_chunk = '  ',
+    indents_obj = nil,
+    inc_indent = request('inc_indent'),
+    dec_indent = request('dec_indent'),
+    update_indent = request('update_indent'),
+
+    get_text = request('get_text'),
+    get_line_length = request('get_line_length'),
+    update_text_width = request('update_text_width'),
+    text_width = 0,
+    get_text_width = request('get_text_width'),
+
+    concat_text_block = request('concat_text_block'),
   }

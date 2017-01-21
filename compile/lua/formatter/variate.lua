@@ -123,7 +123,7 @@ local get_most_suitable_handler =
     return result, is_multiline
   end
 
-local printer_class = request('printer.interface')
+local printer_class = request('^.^.^.string.text_block.interface')
 
 local represent =
   function(self, handler, handler_is_multiline, node)
@@ -131,8 +131,8 @@ local represent =
 
     local trial_presentation = new(printer_class)
     trial_presentation:init()
-    local num_lines = #original_presentation.text.lines
-    trial_presentation.text.lines[1] = original_presentation.text.lines[num_lines]
+    local num_lines = #original_presentation.lines
+    trial_presentation.lines[1] = original_presentation.lines[num_lines]
     trial_presentation.line_indents[1] = original_presentation.line_indents[num_lines]
     trial_presentation.next_line_indent = original_presentation.next_line_indent
 
@@ -148,11 +148,12 @@ local represent =
     else
       has_failed = trial_presentation.has_failed_to_represent
     end
-    if not handler_is_multiline and (#trial_presentation.text.lines > 1) then
+    if not handler_is_multiline and (#trial_presentation.lines > 1) then
       has_failed = true
     end
 
     -- print(('[\n%s\n]'):format(self.printer:get_text()))
+    -- print(('text %s lines'):format(#self.printer.lines))
     self.printer = original_presentation
 
     return trial_presentation, has_failed
@@ -164,6 +165,7 @@ return
 
     local representation
 
+    -- [[
     for i = 1, #representers do
       local handler, handler_is_multiline = get_handler(representers[i])
       if
@@ -186,6 +188,7 @@ return
         end
       end
     end
+    --]]
 
     if not representation then
       local handler, handler_is_multiline =
@@ -195,6 +198,6 @@ return
       self.printer.has_failed_to_represent = true
     end
 
-    self.printer.text.lines[#self.printer.text.lines] = ''
-    self.printer:concat_printer(representation, true)
+    self.printer.lines[#self.printer.lines] = ''
+    self.printer:concat_text_block(representation, true)
   end

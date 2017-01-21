@@ -72,7 +72,7 @@ local multiliner =
       end
     end
     printer:dec_indent()
-    -- printer:request_clean_line()
+    printer:request_clean_line()
   end
 
 local variants =
