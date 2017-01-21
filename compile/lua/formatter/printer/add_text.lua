@@ -1,7 +1,9 @@
+local trim_head_spaces = request('^.^.^.^.string.trim_head_spaces')
+
 return
   function(self, s)
-    self.text:add_text(s)
-    if (#s > 0) then
-      self.on_clean_line = false
+    if self:on_clean_line() then
+      s = trim_head_spaces(s)
     end
+    self.text:add_text(s)
   end

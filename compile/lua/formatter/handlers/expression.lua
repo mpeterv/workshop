@@ -1,9 +1,10 @@
 local oneliner =
   function(self, node)
     local printer = self.printer
-    local term
+
+    printer:inc_indent()
     for term_idx = 1, #node do
-      term = node[term_idx]
+      local term = node[term_idx]
       if term.un_ops then
         local cur_un_op, prev_un_op
         for i = 1, #term.un_ops do
@@ -23,14 +24,29 @@ local oneliner =
         printer:add_text(' ' .. term.bin_op .. ' ')
       end
     end
+    printer:dec_indent()
   end
+
+local line_wrap_ops =
+  {
+    ['and'] = true,
+    ['or'] = true,
+    ['+'] = true,
+    ['-'] = true,
+    ['*'] = true,
+    ['/'] = true,
+    ['//'] = true,
+    ['..'] = true,
+  }
 
 local multiliner =
   function(self, node)
     local printer = self.printer
-    local term
+
+    printer:request_clean_line()
+    printer:inc_indent()
     for term_idx = 1, #node do
-      term = node[term_idx]
+      local term = node[term_idx]
       if term.un_ops then
         local cur_un_op, prev_un_op
         for i = 1, #term.un_ops do
@@ -48,10 +64,27 @@ local multiliner =
       self:process_node(term.operand)
       if term.bin_op then
         printer:add_text(' ' .. term.bin_op)
-        printer:close_line()
+        if line_wrap_ops[term.bin_op] then
+          printer:close_line()
+        else
+          printer:add_text(' ')
+        end
       end
     end
+    printer:dec_indent()
+    -- printer:request_clean_line()
   end
 
+local variants =
+  {
+    {multiliner, is_multiline = true},
+    oneliner,
+  }
+
+-- return oneliner
+-- [[
 return
-  oneliner
+  function(self, node)
+    self:variate(variants, node)
+  end
+--]]

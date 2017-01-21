@@ -71,8 +71,6 @@ local get_handler =
       handler_is_multiline = handler_rec.is_multiline
     elseif is_function(handler_rec) then
       handler = handler_rec
-    end
-    if is_nil(handler_is_multiline) then
       handler_is_multiline = false
     end
     assert_function(handler)
@@ -154,7 +152,7 @@ local represent =
       has_failed = true
     end
 
-    -- print(('[%s]'):format(self.printer:get_text()))
+    -- print(('[\n%s\n]'):format(self.printer:get_text()))
     self.printer = original_presentation
 
     return trial_presentation, has_failed

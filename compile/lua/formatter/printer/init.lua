@@ -5,7 +5,6 @@ return
     self.text:init()
     self.next_line_indent = 0
     self.line_indents = {}
-    self.on_clean_line = true
     self:update_indent()
 
     self.indents_obj = new(indents_class)

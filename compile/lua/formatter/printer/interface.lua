@@ -12,6 +12,7 @@ return
 
     add_text = request('add_text'),
     close_line = request('close_line'),
+    on_clean_line = request('on_clean_line'),
     request_clean_line = request('request_clean_line'),
     request_empty_line = request('request_empty_line'),
 
