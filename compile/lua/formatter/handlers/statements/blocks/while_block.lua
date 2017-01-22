@@ -1,5 +1,5 @@
 return
   function(self, node)
-    self:process_block_oneline('while', nil, node.condition)
-    self:process_block_multiline('do', 'end', node.body)
+    self:process_block_oneline('while ', node.condition, ' do')
+    self:process_block_multiline(nil, node.body, 'end')
   end

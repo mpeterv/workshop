@@ -43,8 +43,6 @@ return
 
     get_text = request('get_text'),
     get_line_length = request('get_line_length'),
-    update_text_width = request('update_text_width'),
-    text_width = 0,
     get_text_width = request('get_text_width'),
 
     concat_text_block = request('concat_text_block'),

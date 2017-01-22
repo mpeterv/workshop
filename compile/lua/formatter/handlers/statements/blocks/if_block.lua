@@ -1,45 +1,33 @@
-local multiline_if =
-  {
-    function(self, node)
-      self.printer:add_text('if')
-      self.printer:request_clean_line()
-      self:process_node(node)
-      self.printer:request_clean_line()
-      self.printer:add_text('then')
-    end,
-    is_multiline = true,
-  }
-
 local oneline_if =
-  {
-    function(self, node)
-      self.printer:add_text('if ')
-      self:process_node(node)
-      self.printer:add_text(' then')
-    end,
-    is_multiline = false,
-  }
+  function(self, node)
+    self:process_block_oneline('if ', node, ' then')
+  end
 
-local multiline_elseif =
+local multiline_if =
+  function(self, node)
+    self:process_block_multiline('if', node, 'then')
+  end
+
+local if_variants =
   {
-    function(self, node)
-      self.printer:add_text('elseif')
-      self.printer:request_clean_line()
-      self:process_node(node)
-      self.printer:request_clean_line()
-      self.printer:add_text('then')
-    end,
-    is_multiline = true,
+    {multiline_if, is_multiline = true},
+    oneline_if,
   }
 
 local oneline_elseif =
+  function(self, node)
+    self:process_block_oneline('elseif ', node, ' then')
+  end
+
+local multiline_elseif =
+  function(self, node)
+    self:process_block_multiline('elseif', node, 'then')
+  end
+
+local elseif_variants =
   {
-    function(self, node)
-      self.printer:add_text('elseif ')
-      self:process_node(node)
-      self.printer:add_text(' then')
-    end,
-    is_multiline = false,
+    {multiline_elseif, is_multiline = true},
+    oneline_elseif,
   }
 
 return
@@ -47,33 +35,20 @@ return
     local printer = self.printer
 
     printer:request_clean_line()
-    self:variate({multiline_if, oneline_if}, node.if_part.condition)
-    printer:request_clean_line()
-    printer:inc_indent()
-    self:process_node(node.if_part.body)
-    printer:dec_indent()
+    self:variate(if_variants, node.if_part.condition)
+    self:process_block_multiline(nil, node.if_part.body)
 
     if node.elseif_parts then
       for i = 1, #node.elseif_parts do
         printer:request_clean_line()
-        self:variate(
-          {multiline_elseif, oneline_elseif},
-          node.elseif_parts[i].condition
-        )
-        printer:request_clean_line()
-        printer:inc_indent()
-        self:process_node(node.elseif_parts[i].body)
-        printer:dec_indent()
+        self:variate(elseif_variants, node.elseif_parts[i].condition)
+        self:process_block_multiline(nil, node.elseif_parts[i].body)
       end
     end
 
     if node.else_part then
       printer:request_clean_line()
-      printer:add_text('else')
-      printer:request_clean_line()
-      printer:inc_indent()
-      self:process_node(node.else_part.body)
-      printer:dec_indent()
+      self:process_block_multiline('else', node.else_part.body)
     end
 
     printer:request_clean_line()

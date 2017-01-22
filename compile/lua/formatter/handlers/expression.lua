@@ -1,8 +1,6 @@
 local oneliner =
   function(self, node)
     local printer = self.printer
-
-    printer:inc_indent()
     for term_idx = 1, #node do
       local term = node[term_idx]
       if term.un_ops then
@@ -24,7 +22,6 @@ local oneliner =
         printer:add_text(' ' .. term.bin_op .. ' ')
       end
     end
-    printer:dec_indent()
   end
 
 local line_wrap_ops =
@@ -44,7 +41,6 @@ local multiliner =
     local printer = self.printer
 
     printer:request_clean_line()
-    printer:inc_indent()
     for term_idx = 1, #node do
       local term = node[term_idx]
       if term.un_ops then
@@ -71,7 +67,6 @@ local multiliner =
         end
       end
     end
-    printer:dec_indent()
     printer:request_clean_line()
   end
 
@@ -81,10 +76,7 @@ local variants =
     oneliner,
   }
 
--- return oneliner
--- [[
 return
   function(self, node)
     self:variate(variants, node)
   end
---]]

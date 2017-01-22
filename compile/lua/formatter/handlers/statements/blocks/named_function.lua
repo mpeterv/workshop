@@ -7,6 +7,6 @@ return
       self:process_node(node.colon_name)
     end
     self:process_node(node.params)
-    self:process_block_multiline(nil, 'end', node.body)
+    self:process_block_multiline(nil, node.body, 'end')
     self.printer:request_empty_line()
   end

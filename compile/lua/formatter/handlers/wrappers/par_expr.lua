@@ -1,9 +1,13 @@
 return
   function(self, node)
-    self.printer:add_text('(')
     local orig_type = node.type
     node.type = 'expression'
+
+    self.printer:add_text('(')
+    self.printer:inc_indent()
     self:process_node(node)
-    node.type = orig_type
+    self.printer:dec_indent()
     self.printer:add_text(')')
+
+    node.type = orig_type
   end

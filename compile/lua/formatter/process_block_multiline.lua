@@ -11,7 +11,7 @@
 ]]
 
 return
-  function(self, prefix, postfix, node)
+  function(self, prefix, node, postfix, alternate_handler)
     local printer = self.printer
 
     if prefix then
@@ -20,7 +20,11 @@ return
 
     printer:request_clean_line()
     printer:inc_indent()
-    self:process_node(node)
+    if alternate_handler then
+      alternate_handler(self, node)
+    else
+      self.process_node(self, node)
+    end
     printer:dec_indent()
     printer:request_clean_line()
 

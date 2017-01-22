@@ -63,70 +63,54 @@ local is_multiline_allowed =
     end
   end
 
-local get_handler =
-  function(handler_rec)
-    local handler, handler_is_multiline
-    if is_table(handler_rec) then
-      handler = handler_rec[1]
-      handler_is_multiline = handler_rec.is_multiline
-    elseif is_function(handler_rec) then
-      handler = handler_rec
-      handler_is_multiline = false
+local get_representer_fields =
+  function(representer)
+    local handler, is_multiline
+    if is_function(representer) then
+      handler = representer
+      is_multiline = false
+    elseif is_table(representer) then
+      handler = representer[1]
+      is_multiline = representer.is_multiline or false
     end
     assert_function(handler)
-    assert_boolean(handler_is_multiline)
-    return handler, handler_is_multiline
+    return handler, is_multiline
   end
 
-local get_most_suitable_handler =
-  function(representers, is_multiline_allowed)
-    local result, is_multiline
-
-    if not result then
-      for i = 1, #representers do
-        local handler, handler_is_multiline = get_handler(representers[i])
-        if (handler_is_multiline and is_multiline_allowed) then
-          result, is_multiline = handler, handler_is_multiline
-          break
-        end
+local get_default_representer_idx =
+  function(representers)
+    local is_multiline_allowed = is_multiline_allowed()
+    for i = 1, #representers do
+      local handler, is_multiline = get_representer_fields(representers[i])
+      if (is_multiline and is_multiline_allowed) then
+        return i
       end
     end
-    if not result then
-      for i = 1, #representers do
-        local handler, handler_is_multiline = get_handler(representers[i])
-        if (not handler_is_multiline and not is_multiline_allowed) then
-          result, is_multiline = handler, handler_is_multiline
-          break
-        end
+    for i = 1, #representers do
+      local handler, is_multiline = get_representer_fields(representers[i])
+      if (not is_multiline and not is_multiline_allowed) then
+        return i
       end
     end
-    if not result then
-      for i = 1, #representers do
-        local handler, handler_is_multiline = get_handler(representers[i])
-        if (not handler_is_multiline and is_multiline_allowed) then
-          result, is_multiline = handler, handler_is_multiline
-          break
-        end
+    for i = 1, #representers do
+      local handler, is_multiline = get_representer_fields(representers[i])
+      if (not is_multiline and is_multiline_allowed) then
+        return i
       end
     end
-    if not result then
-      for i = 1, #representers do
-        local handler, handler_is_multiline = get_handler(representers[i])
-        if (handler_is_multiline and not is_multiline_allowed) then
-          result, is_multiline = handler, handler_is_multiline
-          break
-        end
+    for i = 1, #representers do
+      local handler, is_multiline = get_representer_fields(representers[i])
+      if (is_multiline and not is_multiline_allowed) then
+        return i
       end
     end
-
-    assert(result)
-    return result, is_multiline
+    return 1
   end
 
 local printer_class = request('^.^.^.string.text_block.interface')
 
 local represent =
-  function(self, handler, handler_is_multiline, node)
+  function(self, representer, node)
     local original_presentation = self.printer
 
     local trial_presentation = new(printer_class)
@@ -136,8 +120,10 @@ local represent =
     trial_presentation.line_indents[1] = original_presentation.line_indents[num_lines]
     trial_presentation.next_line_indent = original_presentation.next_line_indent
 
+    local handler, is_multiline = get_representer_fields(representer)
+
     self.printer = trial_presentation
-    add(handler_is_multiline)
+    add(is_multiline)
 
     handler(self, node)
 
@@ -148,7 +134,7 @@ local represent =
     else
       has_failed = trial_presentation.has_failed_to_represent
     end
-    if not handler_is_multiline and (#trial_presentation.lines > 1) then
+    if not is_multiline and (#trial_presentation.lines > 1) then
       has_failed = true
     end
 
@@ -161,28 +147,32 @@ local represent =
 
 return
   function(self, representers, node)
+    local default_handler_idx = get_default_representer_idx(representers)
+    local representation, default_representation
+
     self.printer.has_failed_to_represent = false
 
-    local representation
-
+    --[[
+      Iterate representers until fail. Also store failsafe
+      representation if it occured.
+    ]]
     -- [[
     for i = 1, #representers do
-      local handler, handler_is_multiline = get_handler(representers[i])
+      local handler, is_multiline = get_representer_fields(representers[i])
       if
         is_multiline_allowed() or
-        (not is_multiline_allowed() and not handler_is_multiline)
+        (not is_multiline_allowed() and not is_multiline)
       then
         local trial_presentation, has_failed =
-          represent(self, handler, handler_is_multiline, node)
+          represent(self, representers[i], node)
         if
           not has_failed and
           self:representation_is_allowed(trial_presentation)
         then
           representation = trial_presentation
         else
-          if not representation then
-            self.printer.has_failed_to_represent = true
-            representation = trial_presentation
+          if (i == default_handler_idx) then
+            default_representation = trial_presentation
           end
           break
         end
@@ -191,10 +181,11 @@ return
     --]]
 
     if not representation then
-      local handler, handler_is_multiline =
-        get_most_suitable_handler(representers, is_multiline_allowed())
-      representation =
-        represent(self, handler, handler_is_multiline, node)
+      if not default_representation then
+        default_representation =
+          represent(self, representers[default_handler_idx], node)
+      end
+      representation = default_representation
       self.printer.has_failed_to_represent = true
     end
 

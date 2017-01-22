@@ -1,4 +1,4 @@
 return
   function(self, node)
-    self:process_block_multiline('do', 'end', node.body)
+    self:process_block_multiline('do', node.body, 'end')
   end

@@ -6,8 +6,6 @@ return
     self.line_indents = {0}
     self.next_line_indent = 0
 
-    self.text_width = 0
-
     self.indents_obj = new(indents_class)
     self.indents_obj.indent_chunk = self.indent_chunk
     self.indents_obj:init()
