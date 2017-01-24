@@ -12,7 +12,5 @@ return
     variate = request('variate'),
 
     right_margin = 0,
-    inc_right_margin = request('inc_right_margin'),
-    dec_right_margin = request('dec_right_margin'),
     representation_is_allowed = request('representation_is_allowed'),
   }
