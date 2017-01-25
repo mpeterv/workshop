@@ -1,16 +1,16 @@
 local multiliner =
   function(self, node)
-    self.printer:add_text('function')
+    local printer = self.printer
+
+    printer:request_clean_line()
+    printer:add_text('function')
     self:process_node(node.params)
+
+    printer:request_clean_line()
     self:process_block_multiline(nil, node.body, 'end')
   end
 
-local variants =
-  {
-    {multiliner, is_multiline = true},
-  }
-
 return
   function(self, node)
-    self:variate(variants, node)
+    self:variate(node, nil, multiliner)
   end

@@ -1,10 +1,14 @@
-local place_delimiter =
-  function(self)
-    self.printer:add_to_prev_text(';')
-    self.printer:request_clean_line()
+local multiliner =
+  function(self, node)
+    local printer = self.printer
+    for i = 1, #node do
+      self.printer:request_clean_line()
+      self:process_node(node[i])
+      self.printer:add_to_prev_text(';')
+    end
   end
 
 return
   function(self, node)
-    self:process_list(node, place_delimiter, true)
+    self:variate(node, nil, multiliner)
   end
