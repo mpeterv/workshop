@@ -1,7 +1,7 @@
 return
   function(self, node)
     self.printer:add_text('local ')
-    if not self:process_node(node.name_list) then
+    if not self:process_block(node.name_list) then
       return
     end
     if node.val_list then

@@ -1,6 +1,7 @@
 return
   {
     right_margin = nil,
+    max_text_width = nil,
     indent_chunk = nil,
     printer = new(request('^.^.^.string.text_block.interface')),
     state_keeper = new(request('state_keeper.interface')),

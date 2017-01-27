@@ -61,10 +61,6 @@ return
       self.printer:add_text('{}')
       return true
     else
-      if (#node > self.right_margin // 2) then
-        return multiliner(self, node)
-      else
-        return self:variate(node, oneliner, multiliner)
-      end
+      return self:variate(node, oneliner, multiliner)
     end
   end
