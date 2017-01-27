@@ -1,48 +1,76 @@
+local default_state = {is_multiline_allowed = true, is_last_hope = true}
+
 return
   function(self, node, oneliner, multiliner)
-    local default_representation, result_representation
+    self.state_keeper:enter_level()
+    local our_state = self.state_keeper:get_state() or default_state
+    local is_multiline_allowed = our_state.is_multiline_allowed
+    local is_last_hope = our_state.is_last_hope
+    --[[
+    print(
+      'variate',
+      node.type,
+      oneliner and '1' or '.',
+      multiliner and 'M' or '.',
+      is_last_hope and 'H' or '.',
+      is_multiline_allowed
+    )
+    --]]
+
+    local last_hope_handler
+    if multiliner and is_multiline_allowed then
+      last_hope_handler = multiliner
+    else
+      last_hope_handler = oneliner
+    end
+
+    local result_representation
     local has_succeeded = false
 
     local do_represent =
       function(representer, is_multiline)
+        local representer_is_last_hope =
+          is_last_hope and
+          (representer == last_hope_handler)
+
+        self.state_keeper:set_child_state(
+          {
+            is_multiline_allowed = is_multiline,
+            is_last_hope = representer_is_last_hope,
+          }
+        )
+
         local trial_representation, has_failed =
-          self:represent(representer, is_multiline, node)
-        default_representation = trial_representation
+          self:represent(representer, node)
         if
-          not has_failed and
-          self:representation_is_allowed(trial_representation)
+          representer_is_last_hope or
+          (
+            not has_failed and
+            self:representation_is_allowed(trial_representation)
+          )
         then
           result_representation = trial_representation
           has_succeeded = true
         end
-        -- print(('?[\n%s\n] %s'):format(trial_representation:get_text(), has_failed))
       end
 
-    local line_too_long =
-      self.printer:get_line_length(#self.printer.lines) > self.right_margin
-
-    if
-      not line_too_long and
-      oneliner
-    then
-      -- print('try oneliner')
+    if oneliner then
       do_represent(oneliner, false)
     end
     if
       not result_representation and
       multiliner and
-      self.is_multiline_allowed
+      is_multiline_allowed
     then
-      -- print('try multiliner')
       do_represent(multiliner, true)
     end
-    result_representation = result_representation or default_representation
-    self.printer.has_failed_to_represent = not has_succeeded
 
     if result_representation then
-      -- print(('[\n%s\n] is_ok: %s'):format(result_representation:get_text(), has_succeeded))
-
       self.printer.lines[#self.printer.lines] = ''
       self.printer:concat_text_block(result_representation, true)
     end
+
+    self.state_keeper:leave_level()
+
+    return has_succeeded
   end

@@ -4,14 +4,23 @@ return
 
     printer:request_empty_line()
     printer:add_text('function ')
-    self:process_node(node.dotted_name)
-    if node.colon_name then
-      self:process_node(node.colon_name)
+    if not self:process_node(node.dotted_name) then
+      return
     end
-    self:process_node(node.params)
+    if node.colon_name then
+      if not self:process_node(node.colon_name) then
+        return
+      end
+    end
+    if not self:process_node(node.params) then
+      return
+    end
 
     printer:request_clean_line()
-    self:process_block_multiline(nil, node.body, 'end')
+    if not self:process_block_multiline(nil, node.body, 'end') then
+      return
+    end
 
     printer:request_empty_line()
+    return true
   end

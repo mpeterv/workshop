@@ -1,8 +1,11 @@
 return
   function(self, node)
-    self:process_node(node.dest_list)
+    if not self:process_node(node.dest_list) then
+      return
+    end
     if node.val_list then
       self.printer:add_to_prev_text(' = ')
-      self:process_block(node.val_list)
+      return self:process_block(node.val_list)
     end
+    return true
   end

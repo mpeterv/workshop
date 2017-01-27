@@ -4,11 +4,18 @@ return
 
     printer:request_empty_line()
     printer:add_text('local function ')
-    self:process_node(node.dotted_name)
-    self:process_node(node.params)
+    if not self:process_node(node.dotted_name) then
+      return
+    end
+    if not self:process_node(node.params) then
+      return
+    end
 
     printer:request_clean_line()
-    self:process_block_multiline(nil, node.body, 'end')
+    if not self:process_block_multiline(nil, node.body, 'end') then
+      return
+    end
 
     printer:request_empty_line()
+    return true
   end

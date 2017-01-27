@@ -8,12 +8,17 @@ local oneliner =
       end
       local key, value = node[i].key, node[i].value
       if key then
-        self:process_node(key)
+        if not self:process_node(key) then
+          return
+        end
         printer:add_text(' = ')
       end
-      self:process_node(value)
+      if not self:process_node(value) then
+        return
+      end
     end
     printer:add_text('}')
+    return true
   end
 
 local multiliner =
@@ -28,12 +33,18 @@ local multiliner =
       printer:request_clean_line()
       local key, value = node[i].key, node[i].value
       if key then
-        self:process_node(key)
+        if not self:process_node(key) then
+          return
+        end
         printer:add_text(' = ')
-        self:process_block(value)
+        if not self:process_block(value) then
+          return
+        end
         printer:add_to_prev_text(';')
       else
-        self:process_node(value)
+        if not self:process_node(value) then
+          return
+        end
         printer:add_to_prev_text(';')
       end
     end
@@ -41,17 +52,19 @@ local multiliner =
 
     printer:request_clean_line()
     printer:add_text('}')
+    return true
   end
 
 return
   function(self, node)
     if (#node == 0) then
       self.printer:add_text('{}')
+      return true
     else
       if (#node > self.right_margin // 2) then
-        multiliner(self, node)
+        return multiliner(self, node)
       else
-        self:variate(node, oneliner, multiliner)
+        return self:variate(node, oneliner, multiliner)
       end
     end
   end

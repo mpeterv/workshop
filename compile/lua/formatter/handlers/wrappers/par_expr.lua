@@ -1,22 +1,29 @@
 local oneliner =
   function(self, node)
     self.printer:add_text('(')
-    self:process_node(node.expr)
+    if not self:process_node(node.expr) then
+      return
+    end
     self.printer:add_text(')')
+    return true
   end
 
 local multiliner =
   function(self, node)
     self.printer:add_text('(')
-    self.printer:close_line()
-    self.printer:inc_indent()
-    self:process_node(node.expr)
-    self.printer:dec_indent()
+
+    self.printer:request_clean_line()
+    if not self:process_block(node.expr) then
+      return
+    end
+
     self.printer:request_clean_line()
     self.printer:add_text(')')
+
+    return true
   end
 
 return
   function(self, node)
-    self:variate(node, oneliner, multiliner)
+    return self:variate(node, oneliner, multiliner)
   end

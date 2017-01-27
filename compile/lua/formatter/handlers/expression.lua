@@ -15,17 +15,23 @@ local represent_operand_oneline =
         prev_un_op = cur_un_op
       end
     end
-    self:process_node(node.operand)
+    if not self:process_node(node.operand) then
+      return
+    end
     if node.bin_op then
       printer:add_text(' ' .. node.bin_op .. ' ')
     end
+    return true
   end
 
 local oneliner =
   function(self, node)
     for term_idx = 1, #node do
-      represent_operand_oneline(self, node[term_idx])
+      if not represent_operand_oneline(self, node[term_idx]) then
+        return
+      end
     end
+    return true
   end
 
 local line_wrap_ops =
@@ -42,10 +48,13 @@ local line_wrap_ops =
 
 local represent_operand_multiline =
   function(self, node)
-    represent_operand_oneline(self, node)
+    if not represent_operand_oneline(self, node) then
+      return
+    end
     if line_wrap_ops[node.bin_op] then
       self.printer:request_clean_line()
     end
+    return true
   end
 
 local multiliner =
@@ -53,12 +62,14 @@ local multiliner =
     local printer = self.printer
     printer:request_clean_line()
     for term_idx = 1, #node do
-      represent_operand_multiline(self, node[term_idx])
+      if not represent_operand_multiline(self, node[term_idx]) then
+        return
+      end
     end
-    printer:request_clean_line()
+    return true
   end
 
 return
   function(self, node)
-    self:variate(node, oneliner, multiliner)
+    return self:variate(node, oneliner, multiliner)
   end

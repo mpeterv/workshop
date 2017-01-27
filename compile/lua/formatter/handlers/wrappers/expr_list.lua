@@ -2,7 +2,7 @@ local oneline_delimiter = ', '
 
 local oneliner =
   function(self, node)
-    self:process_list(node, oneline_delimiter)
+    return self:process_list(node, oneline_delimiter)
   end
 
 local multiline_delimiter =
@@ -14,10 +14,10 @@ local multiline_delimiter =
 local multiliner =
   function(self, node)
     self.printer:request_clean_line()
-    self:process_list_variative(node, oneline_delimiter, multiline_delimiter)
+    return self:process_list_variative(node, oneline_delimiter, multiline_delimiter)
   end
 
 return
   function(self, node)
-    self:variate(node, oneliner, multiliner)
+    return self:variate(node, oneliner, multiliner)
   end

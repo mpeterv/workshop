@@ -4,13 +4,15 @@ local multiliner =
 
     printer:request_clean_line()
     printer:add_text('function')
-    self:process_node(node.params)
+    if not self:process_node(node.params) then
+      return
+    end
 
     printer:request_clean_line()
-    self:process_block_multiline(nil, node.body, 'end')
+    return self:process_block_multiline(nil, node.body, 'end')
   end
 
 return
   function(self, node)
-    self:variate(node, nil, multiliner)
+    return self:variate(node, nil, multiliner)
   end

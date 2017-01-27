@@ -1,10 +1,12 @@
 return
   function(self, node, alternate_handler)
+    local result
     self.printer:inc_indent()
     if alternate_handler then
-      alternate_handler(self, node)
+      result = alternate_handler(self, node)
     else
-      self:process_node(node)
+      result = self:process_node(node)
     end
     self.printer:dec_indent()
+    return result
   end
