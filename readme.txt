@@ -23,8 +23,4 @@ code hive version. Also there will be duplication of files,
 when several tools installed, using similar code base. I dont
 care it. I think it's filesystem task to maintain unique files.
 
-What is your name?
-
-I do not need name. You may name me as you wish.
-
 2017-01-23
