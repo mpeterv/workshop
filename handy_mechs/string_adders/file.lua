@@ -46,7 +46,7 @@ local result =
         self.file:flush()
         self.file:seek('set')
         local result
-        result = self.file:read('a')
+        result = self.file:read('*a')
         self.file:seek('end')
         return result
       end,

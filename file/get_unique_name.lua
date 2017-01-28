@@ -8,7 +8,7 @@ return
     local result
     local num_tries = 0
     repeat
-      result = ('%010d.tmp'):format(math.random(2 ^ 32))
+      result = ('%010d.tmp'):format(math.floor(math.random() * 2 ^ 32))
       num_tries = num_tries + 1
       if (num_tries > max_num_tries) then
         error('Too many tries to generate file name. Possibly due same math.randomseed. Stopped.')
