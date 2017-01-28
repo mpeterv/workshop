@@ -24,9 +24,9 @@ return
     key_indent =
       function(self, deep, is_first)
         if is_first then
-          return '\n' .. self.indents_table.indents[(deep + 1) // 2]
+          return '\n' .. self.indents_table.indents[math.floor((deep + 1) / 2)]
         else
-          return self.indents_table.indents[(deep + 1) // 2]
+          return self.indents_table.indents[math.floor((deep + 1) / 2)]
         end
       end,
     key_prefix = '[',
