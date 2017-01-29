@@ -10,9 +10,14 @@ local strip_updirs =
     return s:gsub('%.%./', '')
   end
 
+local strip_self_prefix =
+  function(s)
+    return s:gsub('^%./', '')
+  end
+
 local get_file_name =
   function(file_name)
-    return strip_updirs(file_name)
+    return strip_self_prefix(strip_updirs(file_name))
   end
 
 local strip_lua_postfix =
@@ -20,13 +25,21 @@ local strip_lua_postfix =
     return s:gsub('%.lua$', '')
   end
 
+local strip_self_prefix =
+  function(s)
+    return s:gsub('^%./', '')
+  end
+
 local get_module_name =
   function(cfg, file_name)
     local result
 
-    result = ('%s.%s'):format(cfg.project_name, strip_updirs(file_name))
-    result = result:gsub('/', '.')
+    result = file_name
+    result = strip_self_prefix(result)
     result = strip_lua_postfix(result)
+    result = strip_updirs(result)
+    result = result:gsub('/', '.')
+    result = cfg.project_name .. '.' .. result
 
     return result
   end
@@ -51,11 +64,10 @@ local augment_config =
     assert_string(cfg.project_name)
     cfg.rockspec_name = ('%s-scm-1.rockspec'):format(cfg.project_name)
     cfg.used_files = cfg.used_files or get_loaded_module_files()
+    cfg.bash_script_name = cfg.bash_script_name or ('%s.sh'):format(cfg.bash_command_name)
+    cfg.bash_command_name = cfg.bash_command_name or cfg.bash_script_name
     if cfg.lua_main_module then
       cfg.lua_main_module = strip_lua_postfix(cfg.lua_main_module)
-      cfg.bash_script_name = cfg.bash_script_name or ('%s.sh'):format(cfg.lua_main_module)
-      cfg.bash_command_name = cfg.bash_command_name or cfg.bash_script_name
-      cfg.used_files[#cfg.used_files + 1] = ('%s.lua'):format(cfg.lua_main_module)
     end
   end
 
